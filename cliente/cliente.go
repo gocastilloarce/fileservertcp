@@ -1,18 +1,32 @@
 package main
 
 import (
-	"log"
-	//"flag"
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 )
 
 func cliente() {
-	//nombre := flag.Int("nombre", 0, "El nombre de la persona")
-	//flag.Parse()
-	//fmt.Println("Nombre: ", *nombre)
-	readFile, err := os.ReadFile("a.png")
+	fmt.Println(os.Args)
+	if len(os.Args) == 3 {
+		switch os.Args[1] {
+		case "receive":
+			{
+				channel, err := strconv.Atoi(os.Args[2])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				receive(channel)
+				break
+			}
+		}
+	}
+	/* nombre := flag.String("f", "", "file name")
+	flag.Parse()
+
+	readFile, err := os.ReadFile(*nombre)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,9 +42,6 @@ func cliente() {
 		fmt.Println("error:", err)
 	}
 	fmt.Print("escrito: ", l)
-	archivo, err := os.Open("a.png")
-	fi, err := archivo.Stat()
-	fmt.Println(fi.Size())
 	if err != nil {
 		fmt.Println("error:", err)
 	}
@@ -39,9 +50,14 @@ func cliente() {
 	if err != nil {
 		fmt.Println("error:", err)
 	}
-	fmt.Println("longi", longi)
-	p = p[0:longi]
-	defer c.Close()
+	fmt.Println("longi", longi) */
+	/* longi, err = c.Read(p)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	fmt.Println("longi", longi) */
+	/* c.Close()
+	defer c.Close() */
 	/* for {
 		fmt.Print("Escriba algo: ")
 		reader := bufio.NewReader(os.Stdin)
@@ -52,6 +68,19 @@ func cliente() {
 		c.Write([]byte(fmt.Sprint(msg)))
 	} */
 
+}
+
+func receive(channel int) {
+	c, err := net.Dial("tcp", ":9090")
+	if err != nil {
+		fmt.Print("error: ")
+		fmt.Println(err)
+		return
+	}
+	_, err = c.Write([]byte("subscribe " + strconv.Itoa(channel)))
+	if err != nil {
+		fmt.Println("error:", err)
+	}
 }
 
 func main() {
