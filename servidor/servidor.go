@@ -73,7 +73,7 @@ func handleUserConnection(id string, c net.Conn, connMap *sync.Map, chanMap *syn
 			fmt.Println(err)
 		}
 		subscribe(id, channel, chanMap, c)
-		print("subscribe to " + splits[1])
+		print("subscribe " + id + " to " + splits[1])
 	} else if splits[0] == "send" {
 		channel_number, err := strconv.Atoi(splits[1])
 		if err != nil {
@@ -86,7 +86,9 @@ func handleUserConnection(id string, c net.Conn, connMap *sync.Map, chanMap *syn
 			fmt.Println(err)
 		}
 		filename := splits[3]
+		fmt.Println("Sending " + filename + " to channel " + strconv.Itoa(channel_number))
 		sendFile(id, channel, filename, size, c)
+		fmt.Println("File " + filename + " sent to " + strconv.Itoa(channel_number))
 	}
 	time.Sleep(10 * time.Minute)
 }
@@ -133,13 +135,11 @@ func writeBytes(message []byte, channel *sync.Map) {
 	channel.Range(func(key, value interface{}) bool {
 		conn, ok := value.(net.Conn)
 		if ok {
-			l, err := conn.Write(message)
+			_, err := conn.Write(message)
 			if err != nil {
 				println("error on writing to connection", err.Error())
 			}
-			println("escribiendo bytes: ", l)
 		}
-
 		return true
 	})
 }

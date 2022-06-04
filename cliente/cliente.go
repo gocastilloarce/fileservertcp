@@ -36,51 +36,6 @@ func cliente() {
 			break
 		}
 	}
-	/* nombre := flag.String("f", "", "file name")
-	flag.Parse()
-
-	readFile, err := os.ReadFile(*nombre)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	c, err := net.Dial("tcp", ":9090")
-	if err != nil {
-		fmt.Print("error: ")
-		fmt.Println(err)
-		return
-	}
-	l, err := c.Write(readFile)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	fmt.Print("escrito: ", l)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	p := make([]byte, 2000000)
-	longi, err := c.Read(p)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	fmt.Println("longi", longi) */
-	/* longi, err = c.Read(p)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	fmt.Println("longi", longi) */
-	/* c.Close()
-	defer c.Close() */
-	/* for {
-		fmt.Print("Escriba algo: ")
-		reader := bufio.NewReader(os.Stdin)
-		msg, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-		c.Write([]byte(fmt.Sprint(msg)))
-	} */
-
 }
 
 func receive(channel int) {
@@ -110,7 +65,7 @@ func receive(channel int) {
 			return
 		}
 		size_readed, _ := strconv.Atoi(string(size[:l]))
-		fmt.Println("Por recibir: ", name_readed, " de "+strconv.Itoa(size_readed)+"Bytes")
+		fmt.Println("Por recibir: ", name_readed, " de "+strconv.Itoa(size_readed)+" Bytes")
 
 		file_mem := make([]byte, 0, size_readed)
 		buff := make([]byte, 100000)
@@ -119,9 +74,7 @@ func receive(channel int) {
 			if err != nil {
 				print(err.Error())
 			}
-			println(len(file_mem))
 			file_mem = append(file_mem, buff[:l]...)
-			println(len(file_mem), cap(file_mem))
 			if len(file_mem) == size_readed {
 				break
 			}
