@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -31,7 +32,9 @@ func startServer() {
 	}
 	defer l.Close()
 	var connMap = &sync.Map{}
-	var chanMap = make([]string, 200)
+	var chanMap = &sync.Map{}
+	chanMap.Store(1, &sync.Map{})
+	chanMap.Store(2, &sync.Map{})
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -48,8 +51,15 @@ func handleUserConnection(id string, c net.Conn, connMap *sync.Map, chanMap *syn
 	defer func() {
 		c.Close()
 		connMap.Delete(id)
+		chanMap.Range(func(key, value interface{}) bool {
+			clients_map, ok := value.(*sync.Map)
+			if ok {
+				clients_map.Delete(id)
+			}
+			return true
+		})
 	}()
-	action := make([]byte, 20)
+	action := make([]byte, 200)
 	l, err := bufio.NewReader(c).Read(action)
 	if err != nil {
 		fmt.Println("error reading mode", err)
@@ -62,39 +72,74 @@ func handleUserConnection(id string, c net.Conn, connMap *sync.Map, chanMap *syn
 		if err != nil {
 			fmt.Println(err)
 		}
-		subscribe(id, channel, chanMap)
+		subscribe(id, channel, chanMap, c)
 		print("subscribe to " + splits[1])
+	} else if splits[0] == "send" {
+		channel_number, err := strconv.Atoi(splits[1])
+		if err != nil {
+			fmt.Println(err)
+		}
+		channel_Load, _ := chanMap.Load(channel_number)
+		channel := channel_Load.(*sync.Map)
+		size, err := strconv.Atoi(splits[2])
+		if err != nil {
+			fmt.Println(err)
+		}
+		filename := splits[3]
+		sendFile(id, channel, filename, size, c)
 	}
-	/* for {
-	p := make([]byte, 2000000)
-	len, err := bufio.NewReader(c).Read(p)
-	fmt.Println("Longitud archivo:", len)
-	if err != nil {
-		println("error reading from client")
-		fmt.Println(err)
-		return
-	}
-	os.WriteFile("recibido.txt", p[0:len], 0644)
-	/* _, err = c.Write(p[0:len])
-	if err != nil {
-		println("error reading from client")
-		fmt.Println(err)
-		return
-	} */
-	//println("mensaje:", string(p), id)
-	/* connMap.Range(func(key, value interface{}) bool {
-			conn, ok := value.(net.Conn)
-			if ok {
-				_, err := conn.Write(p[0:len])
-				if err != nil {
-					println("error on writing to connection", err)
-				}
-			}
-			return true
-		})
-	} */
+	time.Sleep(10 * time.Minute)
 }
 
-func subscribe(id string, channel int, chanMap *sync.Map) {
-	chanMap.Store(id)
+func subscribe(id string, channel int, chanMap *sync.Map, conn net.Conn) {
+	chane, _ := chanMap.Load(channel)
+	clients, ok := chane.(*sync.Map)
+	if ok {
+		clients.Store(id, conn)
+	}
+
+}
+
+func sendFile(id string, channel *sync.Map, filename string, size int, c net.Conn) {
+	writeString(filename, channel)
+	writeString(strconv.Itoa(size), channel)
+	buff := make([]byte, 100000)
+	for {
+		l, err := c.Read(buff)
+		if err != nil {
+			println(err.Error())
+		}
+		writeBytes(buff[:l], channel)
+		if l < 1 {
+			break
+		}
+	}
+}
+
+func writeString(message string, channel *sync.Map) {
+	channel.Range(func(key, value interface{}) bool {
+		conn, ok := value.(net.Conn)
+		if ok {
+			_, err := conn.Write([]byte(message))
+			if err != nil {
+				println("error on writing to connection", err.Error())
+			}
+		}
+		return true
+	})
+}
+
+func writeBytes(message []byte, channel *sync.Map) {
+	channel.Range(func(key, value interface{}) bool {
+		conn, ok := value.(net.Conn)
+		if ok {
+			l, err := conn.Write(message)
+			if err != nil {
+				println("error on writing to connection", err.Error())
+			}
+			println("escribiendo bytes: ", l)
+		}
+
+		return true
+	})
 }
