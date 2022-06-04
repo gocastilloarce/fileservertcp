@@ -35,6 +35,14 @@ func startServer() {
 	var chanMap = &sync.Map{}
 	chanMap.Store(1, &sync.Map{})
 	chanMap.Store(2, &sync.Map{})
+	chanMap.Store(3, &sync.Map{})
+	chanMap.Store(4, &sync.Map{})
+	chanMap.Store(5, &sync.Map{})
+	chanMap.Store(6, &sync.Map{})
+	chanMap.Store(7, &sync.Map{})
+	chanMap.Store(8, &sync.Map{})
+	chanMap.Store(9, &sync.Map{})
+	chanMap.Store(10, &sync.Map{})
 	for {
 		conn, err := l.Accept()
 		if err != nil {
