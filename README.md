@@ -1,6 +1,6 @@
 # fileservertcp
 To run server type
-./server.exe startserver
+    ./server.exe startserver
 
 To subscribe to a channel client type
 ./cliente.exe subscribe {channel}
