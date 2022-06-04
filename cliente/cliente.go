@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func cliente() {
+func main() {
 	fmt.Println(os.Args)
 	switch os.Args[1] {
 	case "receive":
@@ -119,9 +119,4 @@ func sendFile(filename string, channel int) {
 	fmt.Print("escrito: ", l)
 	reader := bufio.NewReader(os.Stdin)
 	_, _ = reader.ReadString('\n')
-
-}
-
-func main() {
-	cliente()
 }
